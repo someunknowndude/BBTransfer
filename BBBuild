@@ -1,0 +1,284 @@
+```lua
+function Message(text,MsgTime)
+
+   MsgTime = MsgTime or 2
+
+  local Msg = Instance.new("Message",game.workspace)
+
+  Msg.Text = text
+
+  spawn(function()
+
+      wait(MsgTime)
+
+      Msg:Destroy()
+
+     end)
+
+end
+
+local InstanceLib = (game:GetObjects('rbxassetid://6069479181')[1])
+
+local func = function(...) return loadstring(InstanceLib.Source)(...) end
+
+local InstanceLib = func()
+
+local InstEncode = function(...)
+
+  return InstanceLib:Encode(...)
+
+end
+
+local InstDecode = function(...)
+
+  return InstanceLib:Decode(...)
+
+end
+
+local hservice = game:GetService('HttpService')
+
+ local HeaderString = 'DTHR'
+
+function HandleIncomingData(Data)
+
+  local RawData = (Data:sub(33,-1))
+
+  if RawData:sub(1,4) ~= HeaderString then return end
+
+ 
+
+   local InstanceData = hservice:JSONDecode(RawData:sub(5,-1))
+
+   local Part = InstDecode(InstanceData)
+
+   Part.Anchored = true
+
+   Part.Parent = game.workspace
+
+end
+
+function Init()
+
+   local InitializedSounds = {
+
+       
+
+   }
+
+   local function GetBoomBoxData()
+
+      local Data = {}
+
+       function HandleBoomBox(BoomBox,Plr)
+
+           return pcall(function()
+
+           if BoomBox.Name ~= 'BoomBox' and BoomBox.Name ~= 'SuperFlyGoldBoombox' then return end
+
+           local Sound = BoomBox.Handle.Sound
+
+           Data[Plr.Name] = Sound.SoundId
+
+           end)
+
+       end
+
+      for PlayerI, Player in pairs(game.Players:GetChildren()) do
+
+       for BackpackI,Tool in pairs(Player.Backpack:GetChildren()) do
+
+           if Tool.Name ~= 'BoomBox' and Tool.Name ~= 'SuperFlyGoldBoombox' then continue end
+
+            HandleBoomBox(Tool,Player)
+
+           end
+
+       if not Player.Character then continue end
+
+       for CharI,Part in pairs(Player.Character:GetChildren()) do
+
+           if Part.Name ~= 'BoomBox' and Part.Name ~= 'SuperFlyGoldBoombox' then continue end
+
+            HandleBoomBox(Part,Player)
+
+       end
+
+      end
+
+      return Data
+
+   end
+
+   local function CompareTables(table1,table2)
+
+       local RetTable = {}
+
+       for i,v in pairs(table1) do
+
+          if table1 ~= table2 then
+
+           table.insert(RetTable,v)  
+
+           end
+
+       end
+
+       return RetTable
+
+   end
+
+   spawn(function() -- main loop checking for different ids, i tried to hook some stuff to check when ids change, but was largely unsuccessful
+
+       local FormerBoomBoxData = GetBoomBoxData()
+
+       while wait(0.1) do
+
+           local BoomBoxData = GetBoomBoxData()
+
+           local ChangedIds = CompareTables(BoomBoxData,FormerBoomBoxData)
+
+           for i,v in pairs(ChangedIds) do
+
+               HandleIncomingData(v)
+
+           end
+
+           FormerBoomBoxData = BoomBoxData
+
+       end
+
+   end)
+
+end
+
+Init()
+
+
+
+local function GetLocalBoomBox()
+
+   local BB
+
+   local plr = game.Players.LocalPlayer
+
+   for i,v in pairs(plr.Backpack:GetChildren()) do
+
+       if v.Name == 'BoomBox' or v.Name == 'SuperFlyGoldBoombox' then
+
+           BB = v
+
+       end
+
+   end
+
+   if plr.Character then
+
+       for i,v in pairs(plr.Character:GetChildren()) do
+
+           if v.Name == 'BoomBox' or v.Name == 'SuperFlyGoldBoombox' then
+
+               BB = v
+
+           end
+
+       end
+
+   end
+
+   return BB
+
+end
+
+local function SendData(Data)
+
+   local lpchar = game.Players.LocalPlayer.Character
+
+  local BoomBox = GetLocalBoomBox()
+
+  local StoredParent = BoomBox.Parent
+
+  BoomBox.Parent = lpchar
+
+  BoomBox.Remote:FireServer('PlaySong',HeaderString..Data)
+
+  wait(0.2)
+
+  BoomBox.Parent = StoredParent
+
+end
+
+
+
+local BuildTool = Instance.new('Tool')
+
+BuildTool.Name = "5x5x5 Block"
+
+BuildTool.Parent = game.Players.LocalPlayer.Backpack
+
+BuildTool.RequiresHandle = false
+
+local Mouse = game.Players.LocalPlayer:GetMouse()
+
+Mouse.Button1Down:Connect(function()
+
+   if BuildTool.Parent.Name ~= 'Backpack' then
+
+   local Part = Instance.new('Part')
+
+   Part.Size = Vector3.new(5,5,5)
+   
+   Part.TopSurface = "Glue"
+   Part.BottomSurface = "Glue"
+   Part.LeftSurface = "Glue"
+   Part.RightSurface = "Glue"
+   Part.FrontSurface = "Glue"
+   Part.BackSurface = "Glue"
+   
+   Part.CFrame = CFrame.new(Mouse.Hit.X,Mouse.Hit.Y,Mouse.Hit.Z)
+
+   Part.Anchored = true
+
+   SendData(hservice:JSONEncode(InstEncode(Part,true)))
+
+   end
+
+end)
+
+
+local DrawTool = Instance.new('Tool')
+
+DrawTool.Name = "Draw"
+
+DrawTool.Parent = game.Players.LocalPlayer.Backpack
+
+DrawTool.RequiresHandle = false
+
+
+local holding = false
+
+Mouse.Button1Down:Connect(function()
+    holding= true
+end)
+Mouse.Button1Up:Connect(function()
+    holding = false
+end)
+
+Mouse.Button1Down:Connect(function()
+	repeat wait() until holding == true
+	repeat
+	    wait()
+if DrawTool.Parent.Name ~= 'Backpack' then
+local Ball = Instance.new("Part")
+Ball.Anchored = true
+Ball.CanCollide = false
+Ball.Shape = "Ball"
+Ball.TopSurface = "Smooth"
+Ball.Size = Vector3.new(1, 1, 1)
+Ball.BrickColor = BrickColor.new("Bright red")
+Ball.CFrame = CFrame.new(Mouse.Hit.X,Mouse.Hit.Y,Mouse.Hit.Z)
+
+SendData(hservice:JSONEncode(InstEncode(Ball,true)))
+end
+until holding == false
+
+end) ```
