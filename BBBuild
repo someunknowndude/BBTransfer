@@ -1,4 +1,4 @@
-```lua
+```Lua
 function Message(text,MsgTime)
 
    MsgTime = MsgTime or 2
