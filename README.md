@@ -4,6 +4,7 @@ These scripts all use the fact that trying to use a string in the boombox remote
 ## Todo list
 - Fix part duplication (causes lag when camera close to parts) , i.e fix new data check
 - More BBBuild tools (custom part size, custom rotation, Model inserter [create several parts at once] )
+- Find a way to encrypt data without using Synapse X functions to maintain compatability
 - Script sharing
   - make others execute a loadstring
   - security measures to prevent obvious threats like ip logging
