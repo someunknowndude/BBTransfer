@@ -1,0 +1,206 @@
+-- usage is /e say (message)
+
+
+function Message(text,MsgTime)
+
+   MsgTime = MsgTime or 2
+
+  local Msg = Instance.new("Message",game.workspace)
+
+  Msg.Text = text
+
+  spawn(function()
+
+      wait(MsgTime)
+
+      Msg:Destroy()
+
+     end)
+
+end
+
+local InstanceLib = (game:GetObjects('rbxassetid://6069479181')[1])
+
+local func = function(...) return loadstring(InstanceLib.Source)(...) end
+
+local InstanceLib = func()
+
+local InstEncode = function(...)
+
+  return InstanceLib:Encode(...)
+
+end
+
+local InstDecode = function(...)
+
+  return InstanceLib:Decode(...)
+
+end
+
+local hservice = game:GetService('HttpService')
+
+ local HeaderString = 'DTHG'
+
+function HandleIncomingData(Data,plr)
+
+  local RawData = (Data:sub(33,-1))
+
+  if RawData:sub(1,4) ~= HeaderString then return end
+
+ 
+
+   local InstanceData = RawData:sub(5,-1)
+    Message(plr..': '..InstanceData,6)
+end
+
+function Init()
+
+   local InitializedSounds = {
+
+       
+
+   }
+
+   local function GetBoomBoxData()
+
+      local Data = {}
+
+       function HandleBoomBox(BoomBox,Plr)
+
+           return pcall(function()
+
+           if BoomBox.Name ~= 'BoomBox' and BoomBox.Name ~= 'SuperFlyGoldBoombox' then return end
+
+           local Sound = BoomBox.Handle.Sound
+
+           Data[Plr.Name] = Sound.SoundId
+
+           end)
+
+       end
+
+      for PlayerI, Player in pairs(game.Players:GetChildren()) do
+
+       for BackpackI,Tool in pairs(Player.Backpack:GetChildren()) do
+
+           if Tool.Name ~= 'BoomBox' and Tool.Name ~= 'SuperFlyGoldBoombox' then continue end
+
+            HandleBoomBox(Tool,Player)
+
+           end
+
+       if not Player.Character then continue end
+
+       for CharI,Part in pairs(Player.Character:GetChildren()) do
+
+           if Part.Name ~= 'BoomBox' and Part.Name ~= 'SuperFlyGoldBoombox' then continue end
+
+            HandleBoomBox(Part,Player)
+
+       end
+
+      end
+
+      return Data
+
+   end
+
+   local function CompareTables(table1,table2)
+
+       local RetTable = {}
+
+       for i,v  in pairs(table1) do
+          if table1[i] ~= table2[i] then
+           RetTable[i]=v  
+           end
+
+       end
+
+       return RetTable
+
+   end
+
+   spawn(function() -- main loop checking for different ids, i tried to hook some stuff to check when ids change, but was largely unsuccessful
+
+       local FormerBoomBoxData = GetBoomBoxData()
+       while wait(0.1) do
+
+           local BoomBoxData = GetBoomBoxData()
+
+           local ChangedIds = CompareTables(BoomBoxData,FormerBoomBoxData)
+           for i,v in pairs(ChangedIds) do
+               HandleIncomingData(v,i)
+           end
+           FormerBoomBoxData = BoomBoxData
+
+       end
+
+   end)
+
+end
+
+Init()
+
+
+
+local function GetLocalBoomBox()
+
+   local BB
+
+   local plr = game.Players.LocalPlayer
+
+   for i,v in pairs(plr.Backpack:GetChildren()) do
+
+       if v.Name == 'BoomBox' or v.Name == 'SuperFlyGoldBoombox' then
+
+           BB = v
+
+       end
+
+   end
+
+   if plr.Character then
+
+       for i,v in pairs(plr.Character:GetChildren()) do
+
+           if v.Name == 'BoomBox' or v.Name == 'SuperFlyGoldBoombox' then
+
+               BB = v
+
+           end
+
+       end
+
+   end
+
+   return BB
+
+end
+
+local function SendData(Data)
+
+   local lpchar = game.Players.LocalPlayer.Character
+
+  local BoomBox = GetLocalBoomBox()
+
+  local StoredParent = BoomBox.Parent
+
+  BoomBox.Parent = lpchar
+
+  BoomBox.Remote:FireServer('PlaySong',HeaderString..Data)
+
+  wait(0.2)
+
+  BoomBox.Parent = StoredParent
+
+end
+
+
+game.Players.LocalPlayer.Chatted:Connect(function(...)
+   local msg =  ({...})[1]
+   if msg:sub(1,6) == '/e say' then
+       SendData(msg:sub(8,-1))
+      end
+end)
+
+Message("WELCOME TO BBPRIV CHAT! To begin, simply type /e say YOUR MESSAGE HERE", 10)
