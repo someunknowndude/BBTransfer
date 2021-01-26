@@ -1,4 +1,3 @@
-```lua
 function Message(text,MsgTime)
 
    MsgTime = MsgTime or 2
@@ -282,4 +281,3 @@ end
 until holding == false
 
 end)
-```
