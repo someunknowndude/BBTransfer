@@ -206,21 +206,19 @@ local function SendData(Data)
 
 end
 
-
-
-local BuildTool = Instance.new('Tool')
-
-BuildTool.Name = "5x5x5 Block"
-
-BuildTool.Parent = game.Players.LocalPlayer.Backpack
-
-BuildTool.RequiresHandle = false
-
 local Mouse = game.Players.LocalPlayer:GetMouse()
+
+local BuildTool5 = Instance.new('Tool')
+
+BuildTool5.Name = "5x5x5 Block"
+
+BuildTool5.Parent = game.Players.LocalPlayer.Backpack
+
+BuildTool5.RequiresHandle = false
 
 Mouse.Button1Down:Connect(function()
 
-   if BuildTool.Parent.Name ~= 'Backpack' then
+   if BuildTool5.Parent.Name ~= 'Backpack' then
 
    local Part = Instance.new('Part')
 
@@ -243,6 +241,38 @@ Mouse.Button1Down:Connect(function()
 
 end)
 
+local BuildTool1 = Instance.new('Tool')
+
+BuildTool1.Name = "1x1x1 Block"
+
+BuildTool1.Parent = game.Players.LocalPlayer.Backpack
+
+BuildTool1.RequiresHandle = false
+
+Mouse.Button1Down:Connect(function()
+
+   if BuildTool1.Parent.Name ~= 'Backpack' then
+
+   local Part = Instance.new('Part')
+
+   Part.Size = Vector3.new(1,1,1)
+   
+   Part.TopSurface = "Glue"
+   Part.BottomSurface = "Glue"
+   Part.LeftSurface = "Glue"
+   Part.RightSurface = "Glue"
+   Part.FrontSurface = "Glue"
+   Part.BackSurface = "Glue"
+   
+   Part.CFrame = CFrame.new(Mouse.Hit.X,Mouse.Hit.Y,Mouse.Hit.Z)
+
+   Part.Anchored = true
+
+   SendData(hservice:JSONEncode(InstEncode(Part,true)))
+
+   end
+
+end)
 
 local DrawTool = Instance.new('Tool')
 
